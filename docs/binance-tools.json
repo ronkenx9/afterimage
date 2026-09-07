@@ -1,0 +1,12 @@
+{
+  "qualifiedAt": null,
+  "client": "Codex Desktop",
+  "endpoint": "https://agent.binance.com/mcp/agentic",
+  "authentication": "not connected in this runtime",
+  "tools": [],
+  "writeCapability": "unqualified",
+  "notes": [
+    "Official documentation confirms public market, account, and confirmed trading capabilities.",
+    "Exact runtime tool names and schemas are intentionally absent until an authenticated tools/list succeeds."
+  ]
+}
