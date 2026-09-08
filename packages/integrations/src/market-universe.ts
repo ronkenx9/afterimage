@@ -170,6 +170,44 @@ export async function fetchLiveUniverse(symbols: readonly string[]): Promise<Mar
   }
 }
 
+// ── Historical candles (for the pattern engine) ──
+import type { Candle } from "@/packages/core/src/indicators";
+
+const klineRowSchema = z.tuple([
+  z.number(), // openTime
+  z.string(), // open
+  z.string(), // high
+  z.string(), // low
+  z.string(), // close
+  z.string(), // volume
+]).rest(z.unknown());
+
+/**
+ * Fetch real historical candles from Binance public REST. Returns null on any
+ * failure. `interval` is a Binance interval (e.g. "1h", "4h"); `limit` <= 1000.
+ */
+export async function loadKlines(symbol: string, interval = "1h", limit = 240): Promise<Candle[] | null> {
+  const base = process.env.BINANCE_MARKET_BASE_URL ?? "https://api.binance.com";
+  try {
+    const res = await fetch(
+      `${base}/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${interval}&limit=${limit}`,
+      { cache: "no-store", signal: AbortSignal.timeout(6_000) },
+    );
+    if (!res.ok) return null;
+    const rows = z.array(klineRowSchema).parse(await res.json());
+    return rows.map((r) => ({
+      openTime: r[0],
+      open: Number(r[1]),
+      high: Number(r[2]),
+      low: Number(r[3]),
+      close: Number(r[4]),
+      volume: Number(r[5]),
+    }));
+  } catch {
+    return null;
+  }
+}
+
 /** Live universe with a deterministic captured-real fallback. Always resolves. */
 export async function loadUniverse(symbols: readonly string[] = DEFAULT_UNIVERSE): Promise<MarketRow[]> {
   const live = await fetchLiveUniverse(symbols);

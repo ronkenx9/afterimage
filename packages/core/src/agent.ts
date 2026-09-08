@@ -26,6 +26,7 @@ import {
   DEFAULT_CAPS,
 } from "@/packages/core/src/trade";
 import { planReversal, type ReversalPlan, type ReversalConfig, DEFAULT_REVERSAL } from "@/packages/core/src/reversibility";
+import type { LivePattern } from "@/packages/core/src/patterns";
 
 export type AgentObservation = AlphaInput & { filter: SymbolFilter };
 
@@ -43,6 +44,8 @@ export type TradeProposal = {
   entry: OrderPlan;
   /** The pre-computed undo for the entry. */
   reversal: ReversalPlan;
+  /** Optional learned pattern firing now on this symbol, with its historical edge. */
+  patternEvidence?: LivePattern;
   /** sha256 of the immutable {entry, reversal} payload — owner approves this hash. */
   payloadHash: string;
 };
