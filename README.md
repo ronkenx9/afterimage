@@ -65,14 +65,66 @@ console. Proven non-bypassable in `tests/guardrails.test.ts`:
 - Immutable 60-second paper intents, payload hashes, explicit approval, duplicate protection, and reconciled receipts.
 - Responsive keyboard-accessible UI with reduced-motion support.
 
-## Quick start
+## Setup & launch the dashboard
+
+**Prerequisites:** Node 18+ and pnpm. If you don't have pnpm, enable it via Corepack (bundled with Node):
+
+```sh
+corepack enable
+```
+
+**1. Install dependencies**
 
 ```sh
 pnpm install --frozen-lockfile
+```
+
+**2. Configure environment (optional for the dashboard)**
+
+```sh
+cp .env.example .env.local
+```
+
+The dashboard runs with **zero config** — market reads use Binance's public REST
+by default, and when a host is geo-blocked (HTTP 451) set
+`BINANCE_MARKET_BASE_URL=https://data-api.binance.vision` in `.env.local`. Only
+edit `.env.local` when you want the extras (Solana RPC for `/api/reconstruct`, the
+`AFTERIMAGE_MCP_*` execution transport, or the VPS daemon secret). No API keys are
+needed to run the dashboard.
+
+**3. Start the dev server**
+
+```sh
 pnpm dev
 ```
 
-Open `http://localhost:3000` and choose **Use replay case**.
+**4. Open the dashboards** (dev server runs on **http://localhost:3000**)
+
+| Route | What it is |
+|---|---|
+| **`/agent`** | **The live agent dashboard** — surfaced alphas, per-trade reversibility plans, learned patterns, and the enforced guardrails. Start here. |
+| `/` | Landing + the investigation entry (opens the bundled replay case). |
+| `/case/echo-7` | The reconstruction / Then-Now replay case. |
+
+**API routes** (all read-only unless noted; the agent never submits):
+
+| Endpoint | Returns |
+|---|---|
+| `GET /api/alpha` | Ranked opportunities the agent surfaced. |
+| `GET \| POST /api/agent/tick` | One full agent cycle (alphas → plan → reversal → gated proposals). POST accepts `{ budgetPerTradeQuote, maxProposals }`. |
+| `GET /api/patterns` | Pattern-learning engine: per-setup hit-rate/expectancy + what's firing now. |
+| `GET /api/reconstruct?address=<solana-wallet>` | Live bounded on-chain balance-delta ledger + coverage manifest. |
+| `GET /api/guardrails` | The enforced safety mandates. |
+| `GET /api/capabilities` | Capability catalog + live Agent OS binding status. |
+
+**Run the autonomous agent as a background daemon** (no dashboard needed):
+
+```sh
+pnpm agent --once     # one live cycle, printed to stdout
+pnpm agent            # loop forever (60s), propose-only
+```
+
+To deploy the daemon to a server under systemd, see [ops/DEPLOY.md](ops/DEPLOY.md).
 
 ## Verify
 
@@ -99,8 +151,8 @@ Paper mode is persistent in the interface. The autonomous agent is **propose-onl
 
 ## Current boundaries
 
-- The bundled case is synthetic replay data, not a real wallet claim.
-- Direct Solana wallet ingestion and Jupiter instruction decoding are scaffolded but not complete.
+- The investigation UI's bundled case is synthetic replay data, not a real wallet claim.
+- Live wallet ingestion is real but **bounded**: `GET /api/reconstruct` returns a from-chain balance-delta ledger over the most recent signatures. Full Jupiter/DEX instruction decoding and wiring live wallets into the investigation UI are not complete.
 - Postgres schema is supplied, while the local replay uses process memory for short-lived intents.
 - Binance Agent OS OAuth, balance access, tool schemas, order placement, and fill reconciliation await an authenticated supported-client session.
 - FIFO is an analytical convention, not tax advice. USDC/USDT denomination is not guaranteed exact USD value.
