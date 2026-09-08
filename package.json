@@ -22,6 +22,7 @@
     "agent:worker": "node ops/afterimage-agent-worker.mjs",
     "scan": "node --import tsx scripts/scan.ts",
     "reconstruct": "node --import tsx scripts/reconstruct.ts",
+    "demo:record": "node scripts/record-demo.mjs",
     "demo:replay": "node --import tsx scripts/demo-replay.ts"
   },
   "dependencies": {

@@ -117,14 +117,29 @@ pnpm dev
 | `GET /api/guardrails` | The enforced safety mandates. |
 | `GET /api/capabilities` | Capability catalog + live Agent OS binding status. |
 
-**Run the autonomous agent as a background daemon** (no dashboard needed):
+### Use it from the terminal (no browser)
+
+Everything the dashboard shows is also available headless from the CLI:
 
 ```sh
-pnpm agent --once     # one live cycle, printed to stdout
-pnpm agent            # loop forever (60s), propose-only
+pnpm scan                       # scan the market: surfaced alphas + learned patterns
+pnpm scan BTCUSDT,INJUSDT       # scan a specific set
+pnpm reconstruct <sol-wallet>   # live, bounded on-chain balance-delta ledger
+pnpm agent --once               # one full agent cycle (alphas → plan → reversal), printed
+pnpm agent                      # loop forever (60s), propose-only
 ```
 
-To deploy the daemon to a server under systemd, see [ops/DEPLOY.md](ops/DEPLOY.md).
+To deploy the agent as a background daemon under systemd, see [ops/DEPLOY.md](ops/DEPLOY.md).
+
+### Record a demo (headless browser)
+
+```sh
+BASE_URL=http://localhost:3000 WALLET=<sol-wallet> pnpm demo:record
+```
+
+Drives the dashboard + a live reconstruction in headless Chromium and writes a
+`.webm` (convert to mp4 with `ffmpeg -i in.webm -pix_fmt yuv420p out.mp4`). See
+[docs/VOICE-SCRIPT.md](docs/VOICE-SCRIPT.md) for the matching voiceover.
 
 ## Verify
 
