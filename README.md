@@ -4,10 +4,28 @@
 
 AFTERIMAGE reconstructs observable wallet trading into an evidence-linked timeline, separates verified result from missing basis, compares historical conditions with the present market, and creates an explicitly approved paper order.
 
-This repository is a local verified prototype for the Binance Agent OS Mini Hackathon. It does not claim an authenticated Agent OS account or live trade.
+This repository is a prototype for the Binance Agent OS Mini Hackathon. The agent runs autonomously against live market data and its capability surface is bound to the authenticated Agent OS `tools/list`; it deliberately stops short of spending funds — live order submission stays an owner action (see Safety model).
+
+## The edge
+
+Most trading agents fire an order and forget it. AFTERIMAGE does two things differently:
+
+1. **Surfaces its own alpha.** An autonomous loop reads a live multi-symbol universe, forms deterministic momentum + mean-reversion opinions (liquidity/spread gated), and ranks them with a plain-language rationale — no human tells it what to trade.
+2. **Reversibility.** It refuses to propose an entry without also computing the *undo*: the inverse unwind order, a protective stop, the round-trip cost, the worst-case max loss, a reversibility score, and a time-boxed auto-unwind. Every forward action ships with its afterimage.
+
+See **[docs/ALPHA-AGENT.md](docs/ALPHA-AGENT.md)**.
+
+```sh
+pnpm agent --once     # one autonomous cycle, printed
+pnpm agent            # run it as a server daemon
+```
+
+Then open `/agent` for the live console, or hit `GET /api/alpha` and `GET|POST /api/agent/tick`.
 
 ## What works
 
+- **Autonomous alpha agent** over a live universe (Binance public REST, with a frozen real capture as deterministic fallback) — self-ranked opportunities, real-filter order planning, and a per-trade reversibility plan. Fail-closed: it proposes, it never submits.
+- **Bound Agent OS capability surface** — 13/14 capabilities mapped to live `tools/list` tool names (`pnpm qualify:binance` verifies); `transfer.withdraw` stays owner-only.
 - Bounded Solana-style replay with coverage disclosure and content-addressed evidence.
 - FIFO analytical lots, partial exits, losses, unknown basis, fees, failed events, and unsupported activity.
 - Evidence-linked claims and a limited-sample behavior profile.
@@ -35,16 +53,17 @@ pnpm test:integration
 pnpm test:e2e
 pnpm build
 pnpm qualify:binance
+pnpm agent --once
 pnpm demo:replay
 ```
 
-No automated command places a real trade. `qualify:binance` is read-only.
+No automated command places a real trade. `qualify:binance` is read-only, and `pnpm agent` is propose-only.
 
 ## Safety model
 
 Money math is deterministic and uses Decimal.js. Model output is not required. Same-ticker assets are never mapped by symbol alone. Order approval binds to the exact symbol, side, quantity, price snapshot, fee estimate, expiry, mode, and payload hash. A changed or expired intent is rejected.
 
-Paper mode is persistent in the interface. Live account controls are absent until the exact authenticated Agent OS schemas are qualified. See [integration qualification](docs/INTEGRATION-QUALIFICATION.md) and [live proof](docs/LIVE-PROOF.md).
+Paper mode is persistent in the interface. The autonomous agent is **propose-only**: it surfaces, plans, and reverses, and emits proposals in `AWAITING_APPROVAL` bound to a payload hash — it never submits. Live order submission spends real funds and stays the owner's action: it needs a wired authenticated transport (`AFTERIMAGE_MCP_*`), a per-action owner approval of the exact hash, and the owner's Agent OS client to execute. Irreversible capabilities (`transfer.withdraw`) are never proposed. See [integration qualification](docs/INTEGRATION-QUALIFICATION.md) and [live proof](docs/LIVE-PROOF.md).
 
 ## Current boundaries
 

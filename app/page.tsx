@@ -10,6 +10,7 @@ export default function Home() {
         <a href="#top" className="brand" aria-label="Afterimage home"><BrandMark /> AFTERIMAGE</a>
         <div className="nav-actions">
           <span className="mode-lock"><ShieldCheck size={16} weight="fill" /> Paper mode</span>
+          <Link className="text-link" href="/agent">Agent console <ArrowUpRight size={16} /></Link>
           <Link className="text-link" href="/case/echo-7">Open replay <ArrowUpRight size={16} /></Link>
         </div>
       </nav>

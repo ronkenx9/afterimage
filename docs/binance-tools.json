@@ -1,12 +1,56 @@
 {
-  "qualifiedAt": null,
-  "client": "Codex Desktop",
+  "qualifiedAt": "2026-09-08T00:00:00.000Z",
+  "client": "Claude Code (binance-mcp-server, authenticated session)",
   "endpoint": "https://agent.binance.com/mcp/agentic",
-  "authentication": "not connected in this runtime",
-  "tools": [],
-  "writeCapability": "unqualified",
+  "authentication": "connected via authenticated MCP client; tools/list resolved in-session",
+  "toolNamePrefix": "mcp__binance-mcp-server__",
+  "tools": [
+    { "name": "spot_exchangeInfo", "summary": "Exchange info: symbols with lot-size, tick-size, min-notional filters." },
+    { "name": "spot_ticker24hr", "summary": "24h rolling window price change, incl. best bid/ask (FULL)." },
+    { "name": "spot_tickerPrice", "summary": "Latest price for a symbol." },
+    { "name": "spot_depth", "summary": "Order-book depth." },
+    { "name": "spot_klines", "summary": "Kline/candlestick data." },
+    { "name": "spot_uiKlines", "summary": "UI-optimized kline data." },
+    { "name": "spot_getAccount", "summary": "Account information: free/locked balances per asset." },
+    { "name": "spot_newOrder", "summary": "Place a new Spot order (MARKET/LIMIT/STOP/etc.)." },
+    { "name": "spot_deleteOrder", "summary": "Cancel a single active order by id." },
+    { "name": "spot_deleteOpenOrders", "summary": "Cancel all open orders on a symbol." },
+    { "name": "spot_getOrder", "summary": "Query one order's status/fills." },
+    { "name": "spot_getOpenOrders", "summary": "List all resting open orders." },
+    { "name": "spot_myTrades", "summary": "Account trade list (fills) for a symbol — reconciliation source." },
+    { "name": "convert_sendQuoteRequest", "summary": "Request a firm convert quote (returns quoteId)." },
+    { "name": "convert_acceptQuote", "summary": "Accept a firm convert quote by quoteId." },
+    { "name": "convert_orderStatus", "summary": "Query a convert order's status." },
+    { "name": "convert_listAllConvertPairs", "summary": "List convertible token pairs and limits." },
+    { "name": "wallet_depositAddress", "summary": "Read-only deposit (receive) address for an asset/network." },
+    { "name": "wallet_queryUserWalletBalance", "summary": "Wallet balances valued in a quote asset." },
+    { "name": "wallet_allCoinsInformation", "summary": "Per-coin info incl. supported networks." },
+    { "name": "wallet_withdrawHistory", "summary": "Withdrawal history (read-only; no submit exposed)." },
+    { "name": "wallet_accountStatus", "summary": "Account trading/withdraw status." }
+  ],
+  "bindings": {
+    "market.symbols": "spot_exchangeInfo",
+    "market.quote": "spot_ticker24hr",
+    "market.depth": "spot_depth",
+    "account.balances": "spot_getAccount",
+    "account.portfolio": "wallet_queryUserWalletBalance",
+    "trade.order": "spot_newOrder",
+    "trade.cancel": "spot_deleteOrder",
+    "order.status": "spot_getOrder",
+    "order.open": "spot_getOpenOrders",
+    "order.history": "spot_myTrades",
+    "convert.quote": "convert_sendQuoteRequest",
+    "convert.execute": "convert_acceptQuote",
+    "transfer.depositAddress": "wallet_depositAddress"
+  },
+  "unbound": {
+    "transfer.withdraw": "Intentionally unbound. Irreversible and owner-only; the agent refuses it before binding is consulted. Only wallet_withdrawHistory (read) is exposed by the surface — no withdraw-submit tool."
+  },
+  "writeCapability": "qualified",
   "notes": [
-    "Official documentation confirms public market, account, and confirmed trading capabilities.",
-    "Exact runtime tool names and schemas are intentionally absent until an authenticated tools/list succeeds."
+    "Tool names are the bare Agent OS tools/list identifiers. This MCP client exposes them under the prefix in `toolNamePrefix` (e.g. mcp__binance-mcp-server__spot_newOrder); the transport that AFTERIMAGE wires decides which form it forwards.",
+    "`bindings` maps AFTERIMAGE capability ids (packages/core/src/capabilities.ts) to live tool names resolved from an authenticated tools/list. 13 of 14 capabilities are bound; transfer.withdraw is intentionally owner-only and stays unbound, so bindingReport() reports `partial` by design.",
+    "market.quote binds to spot_ticker24hr with type=FULL so bid/ask are present. account.portfolio uses wallet_queryUserWalletBalance with a quoteAsset for valued totals. order.history binds to spot_myTrades because no all-orders endpoint is exposed; myTrades is the fill/reconciliation source.",
+    "Binding a capability does not enable execution on its own: the adapter still requires a wired MCP transport and, for writes, a per-action owner approval token. No user funds were accessed and no live order was placed while recording this manifest."
   ]
 }
