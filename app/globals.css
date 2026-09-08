@@ -153,3 +153,8 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   .agent-skip-row { grid-template-columns: 1fr auto; }
   .agent-skip-row em { grid-column: 1 / -1; }
 }
+
+/* pattern evidence on proposal cards */
+.agent-pattern { padding: 12px 14px; border: 1px solid #4a5a3f; border-radius: 10px; background: rgba(140,220,120,.06); display: grid; gap: 6px; }
+.agent-pattern-head { display: flex; align-items: center; gap: 7px; color: #b6e3a0; font: 700 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; }
+.agent-pattern small { color: var(--muted); font: 11px var(--font-mono); }

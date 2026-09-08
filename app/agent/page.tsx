@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, ArrowClockwise, TrendUp, Pulse } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, ShieldCheck, ArrowClockwise, TrendUp, Pulse, Brain } from "@phosphor-icons/react/dist/ssr";
 import { BrandMark } from "@/components/brand-mark";
 import { runCycle } from "@/packages/integrations/src/alpha-runtime";
 
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const pct = (n: number) => `${n > 0 ? "+" : ""}${n.toFixed(2)}%`;
 
 export default async function AgentConsole() {
-  const { meta, report } = await runCycle();
+  const { meta, report, patternBreadth } = await runCycle();
 
   return (
     <main className="site-shell agent-shell">
@@ -95,6 +95,21 @@ export default async function AgentConsole() {
                 <small>Auto-unwind by {new Date(p.reversal.unwindBy).toLocaleTimeString()} if the thesis stalls.</small>
               </div>
 
+              {p.patternEvidence && (
+                <div className="agent-pattern">
+                  <div className="agent-pattern-head"><Brain size={15} /> {p.patternEvidence.label}</div>
+                  {p.patternEvidence.history ? (
+                    <small>
+                      Fired {p.patternEvidence.history.occurrences}× in the last window · hit-rate{" "}
+                      {(p.patternEvidence.history.hitRate * 100).toFixed(0)}% · expectancy{" "}
+                      {pct(p.patternEvidence.history.expectancyPct)}
+                    </small>
+                  ) : (
+                    <small>{p.patternEvidence.blurb}</small>
+                  )}
+                </div>
+              )}
+
               <div className="agent-approve">
                 <code>approve {p.payloadHash.slice(0, 18)}…</code>
                 <span className="agent-badge">AWAITING OWNER APPROVAL</span>
@@ -114,6 +129,24 @@ export default async function AgentConsole() {
             </div>
           ))}
         </div>
+
+        <h2 className="agent-h2"><Brain size={20} /> What the agent learned (live candles)</h2>
+        {patternBreadth.length > 0 ? (
+          <div className="agent-skipped">
+            {patternBreadth.map((b) => (
+              <div key={b.id} className="agent-skip-row">
+                <strong>{b.label}</strong>
+                <span>{b.count} firing</span>
+                <em>{b.firingSymbols.join(", ")}</em>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="agent-empty">
+            No named setup is firing across the universe on the latest bar. The engine still learned each pattern&apos;s
+            historical hit-rate from ~240 real candles per symbol — shown on any proposal whose setup is active.
+          </p>
+        )}
 
         <div className="agent-note">
           <ShieldCheck size={18} weight="fill" />
