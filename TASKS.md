@@ -21,6 +21,11 @@ Evidence is recorded in `STATE.md` and the named docs.
 - [x] T15: Reversibility edge — every entry ships its undo: inverse unwind order, protective stop, round-trip cost, max loss, reversibility score, time-boxed auto-unwind (`packages/core/src/reversibility.ts`).
 - [x] T16: Agent control loop — observe → surface → plan → reverse → emit immutable owner-hashed proposals; fail-closed, submits nothing (`packages/core/src/agent.ts`).
 - [x] T17: Run on the server — `pnpm agent` daemon, `/api/alpha`, `/api/agent/tick`, server-rendered `/agent` console; verified live end-to-end + 23 new tests.
+- [x] T18: Deploy the agent daemon to the VPS under systemd (mirror of the muse worker); live via data.binance.vision (`api.binance.com` is HTTP 451 there).
+- [x] T19: Honesty pass — stop the investigate endpoint implying live wallet reconstruction; label the replay demo; README "what's real / what's demo".
+- [x] T20: Pattern-learning engine — real indicators (RSI/EMA/ATR/Donchian) + historical setup backtest (hit-rate, expectancy, bull-trap violations), firing-now + cross-symbol breadth, wired into agent proposals + `/api/patterns` + console. Learns outcomes; not a predictor.
+- [x] T21: Real bounded on-chain reconstruction — Solana RPC balance-delta ledger + coverage manifest at `/api/reconstruct`; verified against mainnet.
+- [x] T22: Submission — public repo published (github.com/ronkenx9/afterimage); demo script + docs updated.
 
 ## Deliberately owner-gated (not automated — policy + design)
 
