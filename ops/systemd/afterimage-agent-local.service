@@ -1,0 +1,30 @@
+[Unit]
+Description=AFTERIMAGE autonomous alpha agent (in-process daemon, propose-only)
+After=network-online.target
+Wants=network-online.target
+
+# Self-contained daemon: runs the agent loop in-process on the box, reading the
+# live market from Binance public REST directly — no deployed app required. Use
+# this when AFTERIMAGE is not hosted elsewhere. If the app IS deployed, prefer the
+# polling worker unit (afterimage-agent.service) instead.
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/afterimage
+EnvironmentFile=-/etc/afterimage/agent.env
+Environment=HOME=/root
+Environment=AGENT_INTERVAL_MS=60000
+Environment=AGENT_BUDGET=100
+Environment=AGENT_MAX=3
+ExecStart=/usr/bin/env node --import tsx /opt/afterimage/scripts/agent.ts
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=read-only
+ProtectSystem=strict
+ReadWritePaths=/opt/afterimage
+
+[Install]
+WantedBy=multi-user.target

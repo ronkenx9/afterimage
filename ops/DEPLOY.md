@@ -1,11 +1,34 @@
 # Deploy the AFTERIMAGE agent daemon to the VPS
 
-Same shape as the Muse Mirror capsule worker: a pure-Node loop under systemd that
-drives the deployed app's `/api/agent/tick` and logs to journald. The daemon is
-**propose-only** — it reads owner-ready proposals and submits nothing.
+Two systemd units, same daemon shape as the Muse Mirror capsule worker, both
+**propose-only** (they read owner-ready proposals and submit nothing):
 
-Prereqs: the AFTERIMAGE Next app is deployed and reachable at some origin (Vercel,
-or `pnpm start` on the box). Node 18+ on the VPS (`/usr/bin/node`).
+- **`afterimage-agent-local.service`** — self-contained: runs the agent loop
+  in-process on the box (`scripts/agent.ts`), reading the market from Binance
+  public REST directly. No deployed app needed. **This is what's installed on the
+  VPS today.**
+- **`afterimage-agent.service`** — thin polling worker
+  (`ops/afterimage-agent-worker.mjs`) that drives a *deployed* app's
+  `/api/agent/tick`. Use this once the Next app is hosted (mirror of muse's setup,
+  whose app is on Vercel).
+
+> **Live-data note:** this VPS (`vps3515339.trouble-free.net`) is in a region
+> where `api.binance.com` returns **HTTP 451** (blocked). The daemon degrades to a
+> frozen snapshot of real captured data (`source=captured-live`, honestly
+> labeled) — it keeps running but the numbers don't move. For a live feed either
+> run the daemon from a non-blocked region, or set `BINANCE_MARKET_BASE_URL` in
+> `/etc/afterimage/agent.env` to a reachable Binance-compatible mirror.
+
+## Installed state (in-process daemon)
+
+```sh
+systemctl status afterimage-agent --no-pager
+journalctl -u afterimage-agent -f
+sudo systemctl restart afterimage-agent   # after rsync-ing new code
+```
+
+The steps below are for the **polling-worker** variant. Prereqs for it: the
+AFTERIMAGE Next app deployed and reachable at some origin. Node 18+ (`/usr/bin/node`).
 
 ## 1. Put the code on the box
 
