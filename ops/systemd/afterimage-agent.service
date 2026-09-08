@@ -1,0 +1,25 @@
+[Unit]
+Description=AFTERIMAGE autonomous alpha agent (propose-only, owner-gated)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/afterimage
+EnvironmentFile=/etc/afterimage/agent.env
+Environment=AFTERIMAGE_APP_ORIGIN=https://afterimage.app
+Environment=AGENT_INTERVAL_MS=60000
+Environment=AGENT_BUDGET=100
+Environment=AGENT_MAX=3
+ExecStart=/usr/bin/node /opt/afterimage/ops/afterimage-agent-worker.mjs
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/afterimage
+
+[Install]
+WantedBy=multi-user.target

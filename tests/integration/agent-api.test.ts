@@ -18,7 +18,7 @@ describe("agent API", () => {
   });
 
   it("GET /api/agent/tick proposes owner-gated trades and submits nothing", async () => {
-    const res = await tickGet();
+    const res = await tickGet(new Request("http://local/api/agent/tick"));
     expect(res.status).toBe(200);
     const { report } = await res.json();
     expect(report.execution.submitted).toBe(false);
@@ -28,6 +28,28 @@ describe("agent API", () => {
       expect(p.state).toBe("AWAITING_APPROVAL");
       expect(p.reversal.unwind.side).not.toBe(p.entry.side);
     }
+  });
+
+  it("gates the tick endpoint when a worker secret is configured", async () => {
+    vi.stubEnv("AFTERIMAGE_AGENT_WORKER_SECRET", "s3cret");
+    const noKey = await tickGet(new Request("http://local/api/agent/tick"));
+    expect(noKey.status).toBe(401);
+
+    const wrong = await tickPost(
+      new Request("http://local/api/agent/tick", { method: "POST", headers: { "x-afterimage-worker-key": "nope" } }),
+    );
+    expect(wrong.status).toBe(401);
+
+    const ok = await tickPost(
+      new Request("http://local/api/agent/tick", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-afterimage-worker-key": "s3cret" },
+        body: JSON.stringify({ maxProposals: 1 }),
+      }),
+    );
+    expect(ok.status).toBe(200);
+    const { report } = await ok.json();
+    expect(report.execution.submitted).toBe(false);
   });
 
   it("POST /api/agent/tick honors budget and maxProposals overrides", async () => {

@@ -19,6 +19,7 @@
     "db:migrate": "node --import tsx scripts/db-migrate.ts",
     "qualify:binance": "node --import tsx scripts/qualify-binance.ts",
     "agent": "node --import tsx scripts/agent.ts",
+    "agent:worker": "node ops/afterimage-agent-worker.mjs",
     "demo:replay": "node --import tsx scripts/demo-replay.ts"
   },
   "dependencies": {

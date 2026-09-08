@@ -14,6 +14,16 @@ const configSchema = z
   })
   .optional();
 
+// Optional shared secret. When AFTERIMAGE_AGENT_WORKER_SECRET is set (e.g. on a
+// VPS-exposed deployment), requests must present it as `x-afterimage-worker-key`.
+// Unset => open (local/dev). This gates a read-only, propose-only endpoint; it
+// never authorizes an order.
+function authorized(request: Request): boolean {
+  const secret = process.env.AFTERIMAGE_AGENT_WORKER_SECRET?.trim();
+  if (!secret) return true;
+  return request.headers.get("x-afterimage-worker-key")?.trim() === secret;
+}
+
 async function tick(body?: unknown) {
   const parsed = configSchema.safeParse(body);
   const overrides = parsed.success ? parsed.data : undefined;
@@ -25,11 +35,13 @@ async function tick(body?: unknown) {
   return NextResponse.json({ meta, report });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!authorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return tick();
 }
 
 export async function POST(request: Request) {
+  if (!authorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.json().catch(() => undefined);
   return tick(body);
 }
