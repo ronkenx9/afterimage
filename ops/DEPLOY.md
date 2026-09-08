@@ -12,12 +12,16 @@ Two systemd units, same daemon shape as the Muse Mirror capsule worker, both
   `/api/agent/tick`. Use this once the Next app is hosted (mirror of muse's setup,
   whose app is on Vercel).
 
-> **Live-data note:** this VPS (`vps3515339.trouble-free.net`) is in a region
-> where `api.binance.com` returns **HTTP 451** (blocked). The daemon degrades to a
-> frozen snapshot of real captured data (`source=captured-live`, honestly
-> labeled) — it keeps running but the numbers don't move. For a live feed either
-> run the daemon from a non-blocked region, or set `BINANCE_MARKET_BASE_URL` in
-> `/etc/afterimage/agent.env` to a reachable Binance-compatible mirror.
+> **Live-data note (resolved on this VPS):** `vps3515339.trouble-free.net` is in a
+> region where Binance's TRADING API hosts (`api.binance.com`, `api1-4`,
+> `api-gcp`) return **HTTP 451**. The public market-data mirror
+> `data-api.binance.vision` serves the same `/api/v3/*` Spot data (same global
+> book) and IS reachable there. `/etc/afterimage/agent.env` is set to
+> `BINANCE_MARKET_BASE_URL=https://data-api.binance.vision`, so the daemon runs on
+> `source=live`. Without it, the daemon still runs but degrades to the labeled
+> `captured-live` snapshot. (Note: `agent.binance.com`, the authenticated Agent OS
+> execution host, is also reachable from this VPS — relevant for owner-gated
+> execution wiring later.)
 
 ## Installed state (in-process daemon)
 
