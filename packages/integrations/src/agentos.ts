@@ -12,8 +12,8 @@ import { z } from "zod";
 import {
   type CapabilityId,
   getCapability,
-  isWrite,
 } from "@/packages/core/src/capabilities";
+import { enforce } from "@/packages/core/src/guardrails";
 
 const bindingFileSchema = z.object({
   qualifiedAt: z.string().nullable(),
@@ -79,6 +79,13 @@ export class OwnerOnlyError extends Error {
   }
 }
 
+export class CapabilityForbiddenError extends Error {
+  constructor(public capability: CapabilityId) {
+    super(`Capability "${capability}" is not on the execution allowlist and can never run.`);
+    this.name = "CapabilityForbiddenError";
+  }
+}
+
 export type InvokeOptions = {
   /** Opaque owner approval token minted by the approval flow for this exact action. */
   approvalToken?: string;
@@ -93,15 +100,27 @@ export type InvokeOptions = {
  * "not connected" error rather than fabricating a result.
  */
 export async function invoke(capability: CapabilityId, args: unknown, options: InvokeOptions = {}): Promise<unknown> {
-  const spec = getCapability(capability);
+  getCapability(capability); // throws on unknown capability — fail closed
 
-  if (spec.irreversible) throw new OwnerOnlyError(capability);
+  // Single hardened chokepoint. No env, config, or data can relax this decision.
+  const decision = enforce({
+    capability,
+    approval: options.approvalToken ? { token: options.approvalToken } : undefined,
+  });
+  if (!decision.allow) {
+    switch (decision.code) {
+      case "IRREVERSIBLE_FORBIDDEN":
+        throw new OwnerOnlyError(capability);
+      case "NOT_ALLOWLISTED":
+        throw new CapabilityForbiddenError(capability);
+      default: // APPROVAL_REQUIRED / APPROVAL_INVALID / APPROVAL_EXPIRED / caps
+        throw new ApprovalRequiredError(capability);
+    }
+  }
 
   const { bindings } = await loadBindings();
   const toolName = bindings[capability];
   if (!toolName) throw new UnboundCapabilityError(capability);
-
-  if (isWrite(capability) && !options.approvalToken) throw new ApprovalRequiredError(capability);
 
   const transport = options.transport;
   if (!transport) {

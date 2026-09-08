@@ -27,6 +27,7 @@ import {
 } from "@/packages/core/src/trade";
 import { planReversal, type ReversalPlan, type ReversalConfig, DEFAULT_REVERSAL } from "@/packages/core/src/reversibility";
 import type { LivePattern } from "@/packages/core/src/patterns";
+import { GUARDRAILS } from "@/packages/core/src/guardrails";
 
 export type AgentObservation = AlphaInput & { filter: SymbolFilter };
 
@@ -105,11 +106,14 @@ export function runAgentCycle(
   const filters = new Map(observations.map((o) => [o.symbol, o.filter]));
   const scan = surfaceAlphas(observations, alphaCfg, now);
 
+  // Hard ceiling: the guardrail cap wins over any config value.
+  const proposalCap = Math.min(config.maxProposals, GUARDRAILS.limits.maxProposalsPerCycle);
+
   const proposals: TradeProposal[] = [];
   const skipped: SkippedOpportunity[] = [];
 
   for (const alpha of scan.actionable) {
-    if (proposals.length >= config.maxProposals) {
+    if (proposals.length >= proposalCap) {
       skipped.push({ symbol: alpha.symbol, score: alpha.score, reason: "Beyond max proposals for this cycle." });
       continue;
     }

@@ -25,7 +25,8 @@ Evidence is recorded in `STATE.md` and the named docs.
 - [x] T19: Honesty pass — stop the investigate endpoint implying live wallet reconstruction; label the replay demo; README "what's real / what's demo".
 - [x] T20: Pattern-learning engine — real indicators (RSI/EMA/ATR/Donchian) + historical setup backtest (hit-rate, expectancy, bull-trap violations), firing-now + cross-symbol breadth, wired into agent proposals + `/api/patterns` + console. Learns outcomes; not a predictor.
 - [x] T21: Real bounded on-chain reconstruction — Solana RPC balance-delta ledger + coverage manifest at `/api/reconstruct`; verified against mainnet.
-- [x] T22: Submission — public repo published (github.com/ronkenx9/afterimage); demo script + docs updated.
+- [x] T22: Submission — public repo published (github.com/ronkenx9/afterimage); demo script + docs updated; authenticated Agent OS live-read evidence recorded.
+- [x] T23: Absolute guardrails — single hardened, prompt-injection-proof chokepoint (`packages/core/src/guardrails.ts` → `enforce()`); frozen mandate manifest, execution allowlist (withdraw never executable), per-order + daily caps, approval/expiry/hash checks; wired into `invoke()` + agent proposal cap; advertised at `/api/guardrails` + `/agent`; 11 non-bypass tests.
 
 ## Deliberately owner-gated (not automated — policy + design)
 

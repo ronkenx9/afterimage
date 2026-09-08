@@ -158,3 +158,10 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .agent-pattern { padding: 12px 14px; border: 1px solid #4a5a3f; border-radius: 10px; background: rgba(140,220,120,.06); display: grid; gap: 6px; }
 .agent-pattern-head { display: flex; align-items: center; gap: 7px; color: #b6e3a0; font: 700 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; }
 .agent-pattern small { color: var(--muted); font: 11px var(--font-mono); }
+
+/* enforced guardrails */
+.agent-guardrails { border: 1px solid #4a4560; border-radius: var(--radius); background: rgba(140,120,220,.06); padding: 20px 22px; }
+.agent-guardrails ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.agent-guardrails li { display: grid; grid-template-columns: 16px 1fr; gap: 10px; align-items: start; color: var(--text); font-size: 13px; line-height: 1.45; }
+.agent-guardrails li svg { color: #b7a6ef; margin-top: 3px; }
+.agent-guardrails-foot { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font: 11px var(--font-mono); line-height: 1.6; }

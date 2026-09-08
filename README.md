@@ -37,6 +37,23 @@ Then open `/agent` for the live console, or hit `GET /api/alpha` and `GET|POST /
 **Deliberately not automated** — execution:
 - The agent **never submits an order.** Live fills require a wired authenticated transport, a per-action owner approval of the exact payload hash, and the owner's Agent OS client. Irreversible capabilities (withdraw) are never proposed.
 
+## Enforced guardrails
+
+Absolute safety mandates live in **code** at a single chokepoint
+(`packages/core/src/guardrails.ts` → `enforce()`), which every execution path
+routes through. They are **not promptable, not configurable, and cannot be
+relaxed by anything the agent reads** — `enforce()` honors only its typed input,
+so an "instruction" hidden in market data, an RPC result, model output, or a
+document is ignored. Advertised at `GET /api/guardrails` and on the `/agent`
+console. Proven non-bypassable in `tests/guardrails.test.ts`:
+
+- The agent never self-submits; every write needs a per-action owner approval bound to the exact payload hash.
+- Irreversible / off-account actions (withdraw, external transfer) are refused outright — even with a valid-looking approval.
+- Spot only — no leverage, margin, or futures.
+- Only allowlisted capabilities can ever run; `transfer.withdraw` is absent from the allowlist and can never execute.
+- Per-order notional cap (250) + daily spend ceiling (1000) + max proposals/cycle; approvals expire and changed intents are rejected.
+- The mandate manifest is frozen at runtime (a mutation attempt throws).
+
 ## What works
 
 - **Autonomous alpha agent** over a live universe (Binance public REST, with a frozen real capture as deterministic fallback) — self-ranked opportunities, real-filter order planning, and a per-trade reversibility plan. Fail-closed: it proposes, it never submits.

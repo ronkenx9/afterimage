@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, ArrowClockwise, TrendUp, Pulse, Brain } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, ShieldCheck, ArrowClockwise, TrendUp, Pulse, Brain, Lock } from "@phosphor-icons/react/dist/ssr";
 import { BrandMark } from "@/components/brand-mark";
 import { runCycle } from "@/packages/integrations/src/alpha-runtime";
+import { GUARDRAILS } from "@/packages/core/src/guardrails";
 
 export const dynamic = "force-dynamic";
 
@@ -147,6 +148,20 @@ export default async function AgentConsole() {
             historical hit-rate from ~240 real candles per symbol — shown on any proposal whose setup is active.
           </p>
         )}
+
+        <h2 className="agent-h2"><Lock size={20} /> Enforced guardrails <span className="rev-score">v{GUARDRAILS.version}</span></h2>
+        <div className="agent-guardrails">
+          <ul>
+            {GUARDRAILS.mandates.map((m, i) => (
+              <li key={i}><Lock size={13} weight="fill" /> {m}</li>
+            ))}
+          </ul>
+          <p className="agent-guardrails-foot">
+            Enforced in code at a single chokepoint — not promptable, not configurable, and not relaxable by anything the
+            agent reads. Per-order cap {GUARDRAILS.limits.maxOrderNotionalQuote} · daily ceiling{" "}
+            {GUARDRAILS.limits.maxDailyNotionalQuote} · max {GUARDRAILS.limits.maxProposalsPerCycle} proposals/cycle.
+          </p>
+        </div>
 
         <div className="agent-note">
           <ShieldCheck size={18} weight="fill" />
