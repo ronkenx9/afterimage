@@ -22,6 +22,19 @@ pnpm agent            # run it as a server daemon
 
 Then open `/agent` for the live console, or hit `GET /api/alpha` and `GET|POST /api/agent/tick`.
 
+## What's real vs. what's a demo (read this before judging)
+
+**Real and live** — the autonomous trading side:
+- Autonomous agent reads **live** Binance Spot market data, surfaces its own ranked alphas, plans orders against **real** exchange filters, and computes a reversibility (undo) plan per trade. Runs as a systemd daemon.
+- A pattern-learning engine ingests **real historical candles** and reports what each setup actually did (forward hit-rate, expectancy, and pattern violations) — explainable, not a black box.
+- Agent OS capability surface bound to the **real authenticated `tools/list`** (13/14; withdraw owner-only).
+
+**Demo / not live** — the reconstruction side:
+- The wallet **reconstruction** UI runs on a **bundled replay case** (`tests/fixtures/case.ts`). Live arbitrary-wallet ingestion and on-chain (Jupiter) decoding are **scaffolded, not wired** — the investigate endpoint says so explicitly and never pretends to have traced a pasted address.
+
+**Deliberately not automated** — execution:
+- The agent **never submits an order.** Live fills require a wired authenticated transport, a per-action owner approval of the exact payload hash, and the owner's Agent OS client. Irreversible capabilities (withdraw) are never proposed.
+
 ## What works
 
 - **Autonomous alpha agent** over a live universe (Binance public REST, with a frozen real capture as deterministic fallback) — self-ranked opportunities, real-filter order planning, and a per-trade reversibility plan. Fail-closed: it proposes, it never submits.

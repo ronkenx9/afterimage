@@ -38,7 +38,7 @@ export function InvestigateForm() {
         <button type="submit" disabled={status === "loading"}>{status === "loading" ? "Tracing" : "Investigate"}<ArrowRight size={18} /></button>
       </div>
       <div className="form-meta">
-        <span id="wallet-help">30-day bounded window. Read-only.</span>
+        <span id="wallet-help">Demo runs on a bundled replay case — live wallet ingestion is not wired in this build.</span>
         <button type="button" className="example-link" onClick={() => { setInput(example); void submit(example); }}><Flask size={15} /> Use replay case</button>
       </div>
       {status === "error" && <p className="form-error" role="alert">{message}</p>}
