@@ -30,8 +30,9 @@ Then open `/agent` for the live console, or hit `GET /api/alpha` and `GET|POST /
 - A pattern-learning engine ingests **real historical candles** and reports what each setup actually did (forward hit-rate, expectancy, and pattern violations) — explainable, not a black box.
 - Agent OS capability surface bound to the **real authenticated `tools/list`** (13/14; withdraw owner-only).
 
-**Demo / not live** — the reconstruction side:
-- The wallet **reconstruction** UI runs on a **bundled replay case** (`tests/fixtures/case.ts`). Live arbitrary-wallet ingestion and on-chain (Jupiter) decoding are **scaffolded, not wired** — the investigate endpoint says so explicitly and never pretends to have traced a pasted address.
+**Reconstruction — partly real, honestly scoped:**
+- `GET /api/reconstruct?address=<solana-wallet>` performs a **real, live, bounded** on-chain reconstruction: it reads the wallet's recent signatures + transactions from Solana RPC and returns a genuine balance-delta ledger (native SOL + SPL tokens) with a coverage manifest. Verified against mainnet. It is **not** a full DEX-trade decode — undecoded operations are counted, not invented (see [docs/PATTERNS.md] and `packages/core/src/reconstruct.ts`).
+- The **investigation UI** still renders the polished **bundled replay case** (`tests/fixtures/case.ts`) — full Jupiter instruction decode + the Then/Now narrative are wired for the replay, not yet for arbitrary live wallets. The investigate endpoint says so explicitly and never pretends to have traced a pasted address.
 
 **Deliberately not automated** — execution:
 - The agent **never submits an order.** Live fills require a wired authenticated transport, a per-action owner approval of the exact payload hash, and the owner's Agent OS client. Irreversible capabilities (withdraw) are never proposed.
