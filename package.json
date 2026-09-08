@@ -20,6 +20,8 @@
     "qualify:binance": "node --import tsx scripts/qualify-binance.ts",
     "agent": "node --import tsx scripts/agent.ts",
     "agent:worker": "node ops/afterimage-agent-worker.mjs",
+    "scan": "node --import tsx scripts/scan.ts",
+    "reconstruct": "node --import tsx scripts/reconstruct.ts",
     "demo:replay": "node --import tsx scripts/demo-replay.ts"
   },
   "dependencies": {
