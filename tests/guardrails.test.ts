@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { enforce, GUARDRAILS, EXECUTION_ALLOWLIST, isForbidden } from "@/packages/core/src/guardrails";
+import { enforce, GUARDRAILS, EXECUTION_ALLOWLIST, isForbidden, resolveOwnerLimits } from "@/packages/core/src/guardrails";
 import { invoke, OwnerOnlyError, CapabilityForbiddenError, ApprovalRequiredError } from "@/packages/integrations/src/agentos";
 
 describe("guardrails — absolute, non-bypassable", () => {
@@ -84,5 +84,34 @@ describe("guardrails — absolute, non-bypassable", () => {
 
   it("CapabilityForbiddenError exists for anything off the allowlist", () => {
     expect(CapabilityForbiddenError).toBeTypeOf("function");
+  });
+});
+
+describe("owner mandates — tighten-only", () => {
+  it("lets the owner make limits stricter", () => {
+    const e = resolveOwnerLimits({ maxOrderNotionalQuote: 50, maxProposalsPerCycle: 2, budgetPerTradeQuote: 40 });
+    expect(e.maxOrderNotionalQuote).toBe("50");
+    expect(e.maxProposalsPerCycle).toBe(2);
+    expect(e.budgetPerTradeQuote).toBe("40");
+    expect(e.clampedToAbsolute).toBe(false);
+  });
+
+  it("clamps any attempt to LOOSEN past the absolute caps", () => {
+    const e = resolveOwnerLimits({ maxOrderNotionalQuote: 100000, maxProposalsPerCycle: 99, budgetPerTradeQuote: 100000 });
+    expect(Number(e.maxOrderNotionalQuote)).toBe(Number(GUARDRAILS.limits.maxOrderNotionalQuote));
+    expect(e.maxProposalsPerCycle).toBe(GUARDRAILS.limits.maxProposalsPerCycle);
+    expect(Number(e.budgetPerTradeQuote)).toBeLessThanOrEqual(Number(GUARDRAILS.limits.maxOrderNotionalQuote));
+    expect(e.clampedToAbsolute).toBe(true);
+  });
+
+  it("never lets budget exceed the (tightened) per-order cap", () => {
+    const e = resolveOwnerLimits({ maxOrderNotionalQuote: 30, budgetPerTradeQuote: 200 });
+    expect(Number(e.budgetPerTradeQuote)).toBeLessThanOrEqual(30);
+  });
+
+  it("defaults to the absolute caps when nothing is set", () => {
+    const e = resolveOwnerLimits();
+    expect(e.maxOrderNotionalQuote).toBe(GUARDRAILS.limits.maxOrderNotionalQuote);
+    expect(e.maxProposalsPerCycle).toBe(GUARDRAILS.limits.maxProposalsPerCycle);
   });
 });

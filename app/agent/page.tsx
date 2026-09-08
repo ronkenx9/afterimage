@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, ArrowClockwise, TrendUp, Pulse, Brain, Lock } from "@phosphor-icons/react/dist/ssr";
 import { BrandMark } from "@/components/brand-mark";
+import { MandatesPanel } from "@/components/mandates-panel";
 import { runCycle } from "@/packages/integrations/src/alpha-runtime";
 import { GUARDRAILS } from "@/packages/core/src/guardrails";
 
@@ -150,6 +151,7 @@ export default async function AgentConsole() {
         )}
 
         <h2 className="agent-h2"><Lock size={20} /> Enforced guardrails <span className="rev-score">v{GUARDRAILS.version}</span></h2>
+        <MandatesPanel />
         <div className="agent-guardrails">
           <ul>
             {GUARDRAILS.mandates.map((m, i) => (

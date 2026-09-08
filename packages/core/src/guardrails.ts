@@ -130,3 +130,43 @@ export function isForbidden(capability: CapabilityId): boolean {
   const d = enforce({ capability });
   return d.code === "IRREVERSIBLE_FORBIDDEN" || d.code === "NOT_ALLOWLISTED";
 }
+
+// ── Owner-settable mandates (TIGHTEN-ONLY) ──
+// The owner may make the limits STRICTER from the dashboard, never looser. Every
+// value is clamped to the absolute code ceiling above, so setting mandates can
+// only reduce risk — it can never widen it past what the guardrails allow.
+
+export type OwnerLimits = {
+  maxOrderNotionalQuote?: number;
+  maxProposalsPerCycle?: number;
+  budgetPerTradeQuote?: number;
+};
+
+export type EffectiveLimits = {
+  maxOrderNotionalQuote: string;
+  maxProposalsPerCycle: number;
+  budgetPerTradeQuote: string;
+  clampedToAbsolute: boolean;
+};
+
+export function resolveOwnerLimits(owner: OwnerLimits = {}): EffectiveLimits {
+  const absNotional = Number(GUARDRAILS.limits.maxOrderNotionalQuote);
+  const absProposals = GUARDRAILS.limits.maxProposalsPerCycle;
+
+  const reqNotional = owner.maxOrderNotionalQuote ?? absNotional;
+  const maxOrderNotional = Math.max(0, Math.min(reqNotional, absNotional));
+
+  const reqProposals = owner.maxProposalsPerCycle ?? absProposals;
+  const maxProposals = Math.max(1, Math.min(reqProposals, absProposals));
+
+  // Budget can never exceed the (already-tightened) per-order cap.
+  const reqBudget = owner.budgetPerTradeQuote ?? maxOrderNotional;
+  const budget = Math.max(0, Math.min(reqBudget, maxOrderNotional));
+
+  return {
+    maxOrderNotionalQuote: String(maxOrderNotional),
+    maxProposalsPerCycle: maxProposals,
+    budgetPerTradeQuote: String(budget),
+    clampedToAbsolute: reqNotional > absNotional || reqProposals > absProposals,
+  };
+}
