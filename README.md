@@ -12,6 +12,7 @@ Most trading agents fire an order and forget it. AFTERIMAGE does two things diff
 
 1. **Surfaces its own alpha.** An autonomous loop reads a live multi-symbol universe, forms deterministic momentum + mean-reversion opinions (liquidity/spread gated), and ranks them with a plain-language rationale — no human tells it what to trade.
 2. **Reversibility.** It refuses to propose an entry without also computing the *undo*: the inverse unwind order, a protective stop, the round-trip cost, the worst-case max loss, a reversibility score, and a time-boxed auto-unwind. Every forward action ships with its afterimage.
+3. **Learns from what actually happened.** A pattern engine ingests ~240 real candles per symbol and measures what each setup *did* — how often "breakout" or "RSI oversold bounce" fired, its hit-rate, and its expectancy — plus pattern *violations* (bull traps) as their own signal. Proposals are annotated with that learned history: "this setup fired 16× and followed through 69% of the time." It is a memory of outcomes, explicitly **not** a predictor. See [docs/PATTERNS.md](docs/PATTERNS.md).
 
 See **[docs/ALPHA-AGENT.md](docs/ALPHA-AGENT.md)**.
 
