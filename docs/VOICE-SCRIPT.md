@@ -19,8 +19,11 @@ generator.
 **[0:34–0:46] — Guardrails**
 > And it can't run wild. The safety rules live in code, at one chokepoint nothing can talk it out of. No withdrawals, ever. Spot only. Hard spending caps. And it will never place an order on its own — that always takes your approval.
 
-**[0:46–0:58] — Reconstruction on chain**
-> It reads the chain, too. Give it a wallet, and it reconstructs the real balance history straight from Solana — bounded, and honest about what it can't see. No made-up numbers.
+**[0:46–0:54] — You set the mandates**
+> And you set the limits. Tighten the per-trade cap right on the dashboard — the code clamps it to a hard ceiling you can make stricter, never looser.
+
+**[0:54–1:04] — Reconstruction on chain**
+> It reads the chain, too. Give it a wallet — from your terminal or the site — and it reconstructs the real balance history straight from Solana, bounded and honest about what it can't see.
 
 **[0:58–1:15] — Close**
 > This isn't a notebook demo. It runs as a daemon on a live server, scanning the market every minute. An agent that finds its own edge, proves what worked, and always leaves you the way back. That's AFTERIMAGE.
@@ -37,7 +40,9 @@ It also remembers. From real historical candles it learns what each setup actual
 
 And it can't run wild. The safety rules live in code, at one chokepoint nothing can talk it out of. No withdrawals, ever. Spot only. Hard spending caps. And it will never place an order on its own — that always takes your approval.
 
-It reads the chain, too. Give it a wallet, and it reconstructs the real balance history straight from Solana — bounded, and honest about what it can't see. No made-up numbers.
+And you set the limits. Tighten the per-trade cap right on the dashboard — the code clamps it to a hard ceiling you can make stricter, never looser.
+
+It reads the chain, too. Give it a wallet, from your terminal or the site, and it reconstructs the real balance history straight from Solana — bounded, and honest about what it can't see.
 
 This isn't a notebook demo. It runs as a daemon on a live server, scanning the market every minute. An agent that finds its own edge, proves what worked, and always leaves you the way back. That's AFTERIMAGE.
 
